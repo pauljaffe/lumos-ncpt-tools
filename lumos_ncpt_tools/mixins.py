@@ -8,9 +8,6 @@ import warnings
 
 import pandas as pd
 import numpy as np
-from scipy.stats import norm
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 class OutliersMixin:
     # Returns the test run ID of NCPT takes in which the queried subtest had an outlier score
