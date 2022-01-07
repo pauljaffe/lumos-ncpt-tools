@@ -1,0 +1,9 @@
+# Vim
+*.sw[po]
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[co]
+
+# Jupyter
+.ipynb_checkpoints/
