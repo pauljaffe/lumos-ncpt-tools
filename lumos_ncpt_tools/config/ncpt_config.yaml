@@ -1,0 +1,41 @@
+# Notes on test batteries: 
+# 1) Format is battery_id: (battery_name, [subtest_ids])
+# 2) The order of the subtest ids is not necessarily the same as the
+# order the battery was administered.
+batteries: 
+  14: ['old_short_order3', [26, 27, 28, 29, 30]]
+  17: ['default_old', [27, 28, 29, 30, 31, 32]] 
+  25: ['Research_cw_experiment', [27, 28, 29, 30, 31, 32, 33]]
+  26: ['verbal_list_learning', [27, 28, 29, 30, 32, 33, 36, 37, 38, 39, 40]]  
+  32: ['wmva_test', [27, 28, 29, 30, 31, 33, 38, 39, 40]]
+  39: ['subscriber_default_old', [28, 29, 30, 31, 33, 38, 39, 40]]
+  50: ['subscriber_default_new', [29, 30, 31, 39, 40, 43, 44, 45]]
+  60: ['default', [51, 52, 53, 54, 55]]
+  
+# Notes on the subtests:
+# 1) Format is specific_subtest_id: [descriptive name, general_subtest_ID, version number]
+# 2) The specific_subtest_id distinguishes different versions of the same subtest;
+# the general_subtest_ID field (below) distinguishes the type of subtest, but not
+# the specific subtest version. 
+subtests: 
+  26: ['go_no_go', 1, 'v2']
+  27: ['divided_visual_attention', 2, 'v2']
+  28: ['forward_span', 3, 'v2']
+  29: ['arithmetic', 4, 'v2']
+  30: ['grammatical_reasoning', 5, 'v2']
+  31: ['progressive_matrices', 6, 'v1']
+  32: ['go_no_go', 1, 'v3']
+  33: ['reverse_span', 7, 'v2']
+  36: ['verbal_list_learning_type1', 8, 'v1']
+  37: ['verbal_list_learning_type2', 8, 'v1']
+  38: ['digit_symbol_coding', 9, 'v1']
+  39: ['trail_making_A', 10, 'v1']
+  40: ['trail_making_B', 11, 'v1']
+  43: ['forward_span', 3, 'v3']
+  44: ['reverse_span', 7, 'v3']
+  45: ['digit_symbol_coding', 9, 'v3']
+  51: ['scale_balance', 12, 'v1']
+  52: ['posner_cueing', 13, 'v1']
+  53: ['complex_span', 14, 'v1']
+  54: ['object_recognition', 15, 'v1']
+  55: ['dual_search', 16, 'v1']

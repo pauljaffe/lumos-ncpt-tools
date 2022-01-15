@@ -4,11 +4,11 @@ import seaborn as sns
 import yaml
 import pkgutil
 import matplotlib.pyplot as plt
-from .mixins import MapConfigInfoMixin, OutliersMixin, ScoreLookupMixin
+import pdb
+from .mixins import OutliersMixin, ScoreLookupMixin
 
 
-class NCPT(MapConfigInfoMixin,
-           OutliersMixin,
+class NCPT(OutliersMixin,
            ScoreLookupMixin):
     """
     Methods for filtering and analyzing a NCPT dataset.
@@ -19,16 +19,10 @@ class NCPT(MapConfigInfoMixin,
     def __init__(self, df):
         super().__init__()
         self.df = df
-        self.config = yaml.safe_load(pkgutil.get_data('lumostools', self.config_path))
+        self.config = yaml.safe_load(pkgutil.get_data('lumos_ncpt_tools', self.config_path))
                
-    def add_subtest_names(self):
-        """Add columns with descriptive names for the the general and specific subtest IDs."""
-        self.add_column_from_config_map(
-                'alternate_ids', 'general_subtest_name', 'specific_subtest_id', 0)
-        self.add_column_from_config_map(
-                'subtests', 'specific_subtest_name', 'specific_subtest_id', 0)
-             
     def get_battery_info(self):
+        # TODO: Scrap this? 
         """Determine all batteries and their subtests in the dataset,
         and the prevalence of each battery."""
         
@@ -52,21 +46,18 @@ class NCPT(MapConfigInfoMixin,
             print(f'{all_batteries[si]}: {battery_n[si]}, {battery_prevalence[si]}%')
                         
     def filter_by_col(self, filt_col, filt_vals, inplace=False, df=None):
-        # Filter by battery, subtest ID, nth_take, etc.
+        # Filter by battery, subtest ID, etc.
         df2filt = self.df if df is None else df            
         if inplace:
             df2filt.query(f'{filt_col} in @filt_vals', inplace=True)
         else:
             return df2filt.query(f'{filt_col} in @filt_vals', inplace=False)  
         
-    def filter_by_baseline_gameplays(self, n_gameplays, inplace=False, df=None):
-        # TODO: remove? 
-        # Filters for NCPT takes in which the number of gameplays before the test was <= n_gameplays
-        df2filt = self.df if df is None else df           
-        if inplace:
-            df2filt.query('num_plays_before <= @n_gameplays', inplace=True)
-        else:
-            return df2filt.query('num_plays_before <= @n_gameplays', inplace=False) 
+    def get_subtest_info(self):
+        pass
+    
+    def get_education_info(self):
+        pass
 
     def filter_by_completeness(self, ids=None, inplace=False, df=None):
         """Retain only users that have completed all of the subtests for 
