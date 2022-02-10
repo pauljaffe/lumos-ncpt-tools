@@ -26,8 +26,8 @@ subtests:
   31: ['progressive_matrices', 6, 'v1']
   32: ['go_no_go', 1, 'v3']
   33: ['reverse_span', 7, 'v2']
-  36: ['verbal_list_learning_type1', 8, 'v1']
-  37: ['verbal_list_learning_type2', 8, 'v1']
+  36: ['verbal_list_learning', 8, 'v1']
+  37: ['delayed_verbal_list_learning', 8, 'v1']
   38: ['digit_symbol_coding', 9, 'v1']
   39: ['trail_making_A', 10, 'v1']
   40: ['trail_making_B', 11, 'v1']
@@ -39,3 +39,14 @@ subtests:
   53: ['complex_span', 14, 'v1']
   54: ['object_recognition', 15, 'v1']
   55: ['dual_search', 16, 'v1']
+  
+education:
+  1: 'Some high school'
+  2: 'High school diploma / GED'
+  3: 'Some college'
+  4: 'College degree'
+  5: 'Professional degree'
+  6: "Master's degree"
+  7: 'Ph.D.'
+  8: "Associate's degree"
+  99: 'Other'

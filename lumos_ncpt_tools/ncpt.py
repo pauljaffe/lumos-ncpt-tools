@@ -1,68 +1,69 @@
+import pkgutil
+import pdb
+
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import yaml
-import pkgutil
 import matplotlib.pyplot as plt
-import pdb
+
 from .mixins import OutliersMixin, ScoreLookupMixin
 
 
 class NCPT(OutliersMixin,
            ScoreLookupMixin):
+    """Methods for filtering and analyzing a NCPT dataset.
+    
+    Args
+    ----
+    df (DataFrame): DataFrame containing NCPT data. 
     """
-    Methods for filtering and analyzing a NCPT dataset.
-    """
-
+    
     config_path = '/config/ncpt_config.yaml'
     
     def __init__(self, df):
         super().__init__()
         self.df = df
         self.config = yaml.safe_load(pkgutil.get_data('lumos_ncpt_tools', self.config_path))
-               
-    def get_battery_info(self):
-        # TODO: Scrap this? 
-        """Determine all batteries and their subtests in the dataset,
-        and the prevalence of each battery."""
         
-        all_batteries = self.df['battery_id'].unique()
-        total_n = len(self.df['test_run_id'].unique())
-        battery_prevalence = np.array([])
-        battery_n = np.array([])
-        battery_subtests = np.array([])
-        for bid in all_batteries:
-            battery_df = self.df.query('battery_id == @bid')
-            this_n = len(battery_df['test_run_id'].unique())
-            battery_n = np.append(battery_n, this_n)
-            battery_prevalence = np.append(battery_prevalence, np.round(100 * (this_n / total_n), 3))
-            battery_subtests = np.append(battery_subtests, battery_df['specific_subtest_id'].unique())
-            
-        # Sort by prevalence
-        sort_inds = np.flip(np.argsort(battery_prevalence))
-        print('Total number of assessments: {0}'.format(total_n))
-        print('Battery ID: N, % of total')
-        for si in sort_inds:
-            print(f'{all_batteries[si]}: {battery_n[si]}, {battery_prevalence[si]}%')
-                        
-    def filter_by_col(self, filt_col, filt_vals, inplace=False, df=None):
-        # Filter by battery, subtest ID, etc.
-        df2filt = self.df if df is None else df            
-        if inplace:
-            df2filt.query(f'{filt_col} in @filt_vals', inplace=True)
-        else:
-            return df2filt.query(f'{filt_col} in @filt_vals', inplace=False)  
+    def report_stats(self):
+        """Display simple summary statistics for the dataset."""
+        n_users = len(self.df['user_id'].unique())
+        n_assessments = len(self.df['test_run_id'].unique())
+        n_subtests = len(self.df)
+        print('Data summary')
+        print('------------')
+        print(f'N users: {n_users}')
+        print(f'N tests: {n_assessments}') 
+        print(f'N subtests: {n_subtests}')
+        print(f'DataFrame columns: {self.df.columns.tolist()}')
+        print('')
         
     def get_subtest_info(self):
-        pass
+        """Display some basic information on the subtests in self.df."""
+        print('Subtest information')
+        print('-------------------')
+        subtests = np.sort(self.df['specific_subtest_id'].unique())
+        for sub in subtests:
+            subtest_df = self.df.query('specific_subtest_id == @sub')
+            name = self.config['subtests'][sub][0]
+            v = self.config['subtests'][sub][2]
+            N = len(subtest_df)
+            print(f'Subtest ID {sub}: {name}, {v}, N scores = {N}')
+        print('')
     
     def get_education_info(self):
-        pass
+        """Display the meaning of the numeric education levels."""
+        edu = self.config['education']
+        for key, val in edu.items():
+            print(f'{key}: {val}')
+        print('')
 
     def filter_by_completeness(self, ids=None, inplace=False, df=None):
         """Retain only users that have completed all of the subtests for 
         a given battery (i.e. no other subtests and no missing subtests).
         """
+        
         df2filt = self.df if df is None else df
         ids2filt = df2filt['battery_id'].unique() if ids is None else ids     
         keep_run_ids = []
@@ -86,27 +87,7 @@ class NCPT(OutliersMixin,
             exclude_df = df2filt.query('test_run_id not in @keep_run_ids', inplace=False)
             
         return filt_df, exclude_df
-        
-        
-    def drop_nan_rows(self, cols, inplace=False, df=None):
-        df2filt = self.df if df is None else df
-        if inplace:
-            df2filt.dropna(subset=cols, inplace=True)
-        else:
-            return df2filt.dropna(subset=cols, inplace=False)
-        
-        
-    def report_stats(self):
-        """Print simple summary statistics for the dataset."""
-        n_users = len(self.df['user_id'].unique())
-        n_assessments = len(self.df['test_run_id'].unique())
-        print('Summary Stats')
-        print(f'N users: {n_users}')
-        print(f'N assessments: {n_assessments}') 
-        print(f'N rows: {len(self.df)}')
-        print('')
-        
-        
+ 
     def plot_score_dists_new_seaborn(self, subtests='all', save_dir=None):
         if subtests == 'all':
             plot_df = self.df
@@ -119,8 +100,7 @@ class NCPT(OutliersMixin,
                     bbox_inches='tight', dpi=150)
             normed_score_fig.savefig(save_dir + '/' + 'normed_score_dists.png',
                     bbox_inches='tight', dpi=150)
-            
-            
+                        
     def plot_score_dists(self, subtests, save_dir=None, figsize=(12, 6)):
         if subtests == 'all':
             plot_tests = self.df['specific_subtest_id'].unique()
