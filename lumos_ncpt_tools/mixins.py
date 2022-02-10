@@ -105,7 +105,7 @@ class ScoreLookupMixin:
         self.df = subtest_normed_df.drop(columns=['negated_score'])
         self.df.sort_values(by=['user_id', 'test_run_id'], inplace=True)
         self.df.reset_index(drop=True, inplace=True)
-        print(f'Done! Added normalized scores in column {method}_normed_score.')
+        print(f'Done! Added normalized scores in column {method}_normed_score')
         
     def add_grand_index(self, norm_parent_dir):
         """Calculate a composite score for each NCPT assessment;
@@ -124,9 +124,10 @@ class ScoreLookupMixin:
         
         # Calculate the mean subtest score for completed tests     
         complete_df, incomplete_df = self.filter_by_completeness(inplace=False)
-        complete_df['mean_normed_score'] = complete_df.groupby(
+        mean_scores = complete_df.groupby(
             'test_run_id')['census_rank_INT_normed_score'].transform('mean')
-        incomplete_df['mean_normed_score'] = np.nan
+        complete_df = complete_df.assign(mean_normed_score=mean_scores)
+        incomplete_df = incomplete_df.assign(mean_normed_score=np.nan)
         self.df = pd.concat([complete_df, incomplete_df])
         
         # Look up the grand index by battery
@@ -139,7 +140,7 @@ class ScoreLookupMixin:
         self.df.drop(columns=['mean_normed_score'], inplace=True)
         self.df = self.df.sort_values(by=['user_id', 'test_run_id'])
         self.df = self.df.reset_index(drop=True)
-        print('Done! Added composite score in column grand_index.') 
+        print('Done! Added composite score in column grand_index') 
                        
     def _lookup_subtest_norms(self, method, norm_dir):
         subtests = self.df['specific_subtest_id'].unique()

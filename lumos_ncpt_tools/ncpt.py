@@ -1,11 +1,8 @@
 import pkgutil
-import pdb
 
 import pandas as pd
 import numpy as np
-import seaborn as sns
 import yaml
-import matplotlib.pyplot as plt
 
 from .mixins import OutliersMixin, ScoreLookupMixin
 
@@ -55,13 +52,27 @@ class NCPT(OutliersMixin,
     def get_education_info(self):
         """Display the meaning of the numeric education levels."""
         edu = self.config['education']
+        print('Key for education levels')
+        print('------------------------')
         for key, val in edu.items():
             print(f'{key}: {val}')
         print('')
 
-    def filter_by_completeness(self, ids=None, inplace=False, df=None):
+    def filter_by_completeness(self, ids=None, df=None):
         """Retain only users that have completed all of the subtests for 
         a given battery (i.e. no other subtests and no missing subtests).
+        
+        Args
+        ----        
+        ids (list, optional): List of battery IDs to screen for incomplete NCPT assessments. 
+        df (DataFrame, optional): DataFrame containing data to be screened for incomplete assessments.
+            If set to None (the default), self.df is used (i.e., the df attribute of the NCPT
+            class instance). 
+                              
+        Returns
+        -------
+        filt_df (DataFrame): DataFrame with test runs in which the entire assessment was completed.
+        exclude_df (DataFrame): DataFrame with incomplete test runs. 
         """
         
         df2filt = self.df if df is None else df
@@ -78,44 +89,17 @@ class NCPT(OutliersMixin,
             unique_subtests = battery_df.groupby('test_run_id')['specific_subtest_id'].nunique()
             correct_unique = unique_subtests[unique_subtests == len(b_subtests)].index.tolist()
             keep_run_ids.extend(list(set(correct_num).intersection(set(correct_unique))))
-
-        if inplace:
-            df2filt.query('test_run_id in @keep_run_ids', inplace=True)
-            filt_df, exclude_df = None, None
-        else:
-            filt_df = df2filt.query('test_run_id in @keep_run_ids', inplace=False)
-            exclude_df = df2filt.query('test_run_id not in @keep_run_ids', inplace=False)
-            
+        filt_df = df2filt.query('test_run_id in @keep_run_ids',)
+        exclude_df = df2filt.query('test_run_id not in @keep_run_ids')           
         return filt_df, exclude_df
- 
-    def plot_score_dists_new_seaborn(self, subtests='all', save_dir=None):
-        if subtests == 'all':
-            plot_df = self.df
-        else:
-            plot_df = self.df.query('specific_subtest_id in @subtests')
-        raw_score_fig = sns.displot(data=plot_df, x='raw_score', col='specific_subtest_id', kind="kde")
-        normed_score_fig = sns.displot(data=plot_df, x='normed_score', col='specific_subtest_id', kind="kde")
-        if save_dir is not None:
-            raw_score_fig.savefig(save_dir + '/' + 'raw_score_dists.png',
-                    bbox_inches='tight', dpi=150)
-            normed_score_fig.savefig(save_dir + '/' + 'normed_score_dists.png',
-                    bbox_inches='tight', dpi=150)
-                        
-    def plot_score_dists(self, subtests, save_dir=None, figsize=(12, 6)):
-        if subtests == 'all':
-            plot_tests = self.df['specific_subtest_id'].unique()
-        else:
-            plot_tests = subtests
-        score_fig, score_ax = plt.subplots(2, len(plot_tests), figsize=figsize)
-        for ind, st in enumerate(plot_tests):
-            st_df = self.df.query('specific_subtest_id == @st')
-            sns.distplot(st_df['raw_score'], hist=False, ax=score_ax[0, ind])
-            score_ax[0, ind].set_title(f'test id {st}')
-            sns.distplot(st_df['normed_score'], hist=False, ax=score_ax[1, ind])           
-        if save_dir is not None:
-            score_fig.savefig(save_dir + '/' + 'score_dists.png',
-                    bbox_inches='tight', dpi=150)
-        plt.show()
-           
+
     def save_df(self, save_path):        
+        """Save the DataFrame from this class instance. 
+        
+        Args
+        ----        
+        save_path (str): Path where self.df is to be saved (e.g. '/home/data.csv')
+        """
+        
         self.df.to_csv(save_path, sep=',', index=False)
+        print(f'Saved data to {save_path}')
