@@ -1,3 +1,7 @@
+import pkgutil
+import csv
+import io
+
 import pandas as pd
 
 
@@ -14,4 +18,11 @@ def load_data(data_path, fn, chunksize=1e6, nrows='all', verbose=False, n_print=
         print(df.info())
         print(df.head(n_print))
     
+    return df
+
+
+def load_test_data():
+    data_path = '../tests/test_df.csv'
+    df = pd.read_csv(io.StringIO(
+        pkgutil.get_data('lumos_ncpt_tools', data_path).decode('utf-8')))
     return df
