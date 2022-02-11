@@ -1,6 +1,7 @@
 import pickle
 import os
 import functools
+import pkgutil
 
 import pandas as pd
 import numpy as np
@@ -83,8 +84,10 @@ class OutliersMixin:
                                             
 class ScoreLookupMixin:
     subtests_to_negate = {39, 40, 48, 49}
+    census_INT_norm_dir = '/config/census_rank_INT_norm_tables/'
+    INT_norm_dir = '/config/rank_INT_norm_tables/'
     
-    def lookup_normed_scores(self, method, norm_parent_dir):
+    def lookup_normed_scores(self, method):
         """Lookup normalized scores and add them as a column to self.df.
         The new column will be named '[method]_normed_score'.
 
@@ -96,18 +99,16 @@ class ScoreLookupMixin:
             census_rank_INT is a rank-based INT reweighted to match the demographics
             of the 2019 US census (see data descriptor manuscript). Both transformations
             are scaled to have a mean of 100 and a SD of 15. 
-        norm_parent_dir (str): Parent directory containing the folders with the norm tables.
         """
         
         print('Looking up norms...')
-        norm_table_dir = os.path.join(norm_parent_dir, f'{method}_norm_tables')
-        subtest_normed_df = pd.concat([df for df in self._lookup_subtest_norms(method, norm_table_dir)])
+        subtest_normed_df = pd.concat([df for df in self._lookup_subtest_norms(method)])
         self.df = subtest_normed_df.drop(columns=['negated_score'])
         self.df.sort_values(by=['user_id', 'test_run_id'], inplace=True)
         self.df.reset_index(drop=True, inplace=True)
         print(f'Done! Added normalized scores in column {method}_normed_score')
         
-    def add_grand_index(self, norm_parent_dir):
+    def add_grand_index(self):
         """Calculate a composite score for each NCPT assessment;
         add this as column 'grand_index' to self.df. The grand index
         is only calculated for completed assessments (i.e., all subtests completed).
@@ -118,12 +119,11 @@ class ScoreLookupMixin:
         """
         
         print('Adding grand index...')
-        norm_table_dir = os.path.join(norm_parent_dir, 'census_rank_INT_norm_tables')
         if 'census_rank_INT_normed_score' not in self.df.columns:
-            self.lookup_normed_scores('census_rank_INT', norm_table_dir) 
+            self.lookup_normed_scores('census_rank_INT') 
         
         # Calculate the mean subtest score for completed tests     
-        complete_df, incomplete_df = self.filter_by_completeness(inplace=False)
+        complete_df, incomplete_df = self.filter_by_completeness()
         mean_scores = complete_df.groupby(
             'test_run_id')['census_rank_INT_normed_score'].transform('mean')
         complete_df = complete_df.assign(mean_normed_score=mean_scores)
@@ -132,7 +132,7 @@ class ScoreLookupMixin:
         
         # Look up the grand index by battery
         battery_normed_df = pd.concat(
-            [df for df in self._lookup_battery_norms('census_rank_INT', norm_table_dir)])                               
+            [df for df in self._lookup_battery_norms('census_rank_INT')])                               
         GI_df = battery_normed_df[['test_run_id', 'grand_index']].drop_duplicates()
         GI_map = dict(zip(GI_df['test_run_id'], GI_df['grand_index']))        
         self.df.loc[:, 'grand_index'] = self.df['test_run_id'].map(GI_map)
@@ -142,7 +142,11 @@ class ScoreLookupMixin:
         self.df = self.df.reset_index(drop=True)
         print('Done! Added composite score in column grand_index') 
                        
-    def _lookup_subtest_norms(self, method, norm_dir):
+    def _lookup_subtest_norms(self, method):
+        if method == 'census_rank_INT':
+            norm_dir = self.census_INT_norm_dir
+        elif method == 'rank_INT':
+            norm_dir = self.INT_norm_dir
         subtests = self.df['specific_subtest_id'].unique()
         norm_col_name = f'{method}_normed_score'
         for sub in subtests:
@@ -159,12 +163,16 @@ class ScoreLookupMixin:
 
             try:
                 yield self._lookup_normed_scores(subtest_df, col_to_norm, 
-                                                 norm_col_name, table_fn, method, norm_dir)
+                                                 norm_col_name, table_fn, norm_dir)
             except FileNotFoundError:
                 print(f'No norm table for {table_fn}!')
                 continue
          
-    def _lookup_battery_norms(self, method, norm_dir):
+    def _lookup_battery_norms(self, method):
+        if method == 'census_rank_INT':
+            norm_dir = self.census_INT_norm_dir
+        elif method == 'rank_INT':
+            norm_dir = self.INT_norm_dir
         batteries = self.df['battery_id'].unique()
         for bat in batteries:            
             table_fn = f'battery_{int(bat)}.pkl'
@@ -172,14 +180,14 @@ class ScoreLookupMixin:
             battery_df = battery_df.groupby('test_run_id', as_index=False).nth(0)
             try:
                 yield self._lookup_normed_scores(battery_df, 'mean_normed_score', 
-                                                 'grand_index', table_fn, method, norm_dir)
+                                                 'grand_index', table_fn, norm_dir)
             except FileNotFoundError:
                 print(f'No norm table for {table_fn}!')
                 continue                
             
-    def _lookup_normed_scores(self, subdf, raw_col, normed_col, table_fn, method, norm_dir):
-        with open(os.path.join(norm_dir, table_fn), 'rb') as fn:
-            lookup_table = pickle.load(fn)
+    def _lookup_normed_scores(self, subdf, raw_col, normed_col, table_fn, norm_dir):
+        table_path = os.path.join(norm_dir, table_fn)
+        lookup_table = pickle.loads(pkgutil.get_data('lumos_ncpt_tools', table_path))
         norm_function = functools.partial(self._round_to_nearest, lookup_table=lookup_table)
         norms = subdf[raw_col].map(norm_function, na_action='ignore')
         subdf.loc[:, normed_col] = norms
