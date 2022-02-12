@@ -150,7 +150,6 @@ class ScoreLookupMixin:
         subtests = self.df['specific_subtest_id'].unique()
         norm_col_name = f'{method}_normed_score'
         for sub in subtests:
-            print(f'Looking up norms for subtest ID {sub}')
             table_fn = f'subtest_{int(sub)}.pkl'
             subtest_df = self.df.query('specific_subtest_id == @sub').copy(deep=True)          
             # Negate the scores of select subtests so that higher score = better
