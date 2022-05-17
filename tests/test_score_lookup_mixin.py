@@ -16,7 +16,7 @@ test_conditions = [
     test_conditions
 )
 def test_score_lookup(norm_method):
-    subtests_to_negate = {39, 40, 48, 49}    
+    subtests_to_negate = {26, 32, 39, 40, 48, 49}    
     df = load_test_data()
     ncpt = NCPT(df)
     

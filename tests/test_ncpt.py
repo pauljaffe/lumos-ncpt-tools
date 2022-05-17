@@ -8,7 +8,7 @@ from lumos_ncpt_tools.utils import load_test_data
 
 def test_ncpt():
     # Hard-coded parameters
-    test_id = 2190554
+    test_id = 3077135
     subtest_id = 29
     
     # Load test data
