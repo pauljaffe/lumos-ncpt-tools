@@ -18,7 +18,8 @@ class Table1():
     age_bins = [[18, 29], [30, 39], [40, 49], [50, 59], [60, 69], [70, 99]]
     edu_map = {'Some high school': [1], 'High school': [2], 'Some college': [3],
                "Associate's degree": [8], 'College degree': [4], 
-               'Professional degree': [5, 6, 7], 'Other': [99]}
+               'Professional degree': [5], "Master's degree": [6],
+               'Ph.D.': [7], 'Other': [99]}
     
     def __init__(self, data_dir, save_dir, figsize):
         self.data_dir = data_dir
@@ -98,6 +99,6 @@ class Table1():
             table_data.append(this_data)
         
         data_array = np.array(table_data).T
-        table = Table(self.figsize)
+        table = Table(self.figsize, scale=(1, 1.25))
         table_fig = table.plot_table(cols, rows, data_array)
         return table_fig
