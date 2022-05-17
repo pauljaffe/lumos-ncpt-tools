@@ -83,7 +83,7 @@ class OutliersMixin:
     
                                             
 class ScoreLookupMixin:
-    subtests_to_negate = {39, 40, 48, 49}
+    subtests_to_negate = {26, 32, 39, 40, 48, 49}
     census_INT_norm_dir = '/config/census_rank_INT_norm_tables/'
     INT_norm_dir = '/config/rank_INT_norm_tables/'
     
