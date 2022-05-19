@@ -1,7 +1,11 @@
 lumos-ncpt-tools
 ------------
 
-lumos-ncpt-tools is a bare-bones Python package for working with data from the NeuroCognitive Performance Test (NCPT; Lumos Labs, Inc.). NCPT data from ~750,000 adults are freely available at [placeholder]. For more details about the dataset, check out the Data Descriptor publication: [placeholder].   
+lumos-ncpt-tools is a bare-bones Python package for working with data from the NeuroCognitive Performance Test (NCPT; Lumos Labs, Inc.). 
+
+NCPT data from ~750,000 adults are freely available at [placeholder]. 
+
+For more details about the dataset, check out the Data Descriptor publication: [placeholder].   
 
 
 Quick start guide
