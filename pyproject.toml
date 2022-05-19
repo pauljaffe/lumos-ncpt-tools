@@ -2,7 +2,11 @@
 name = "lumos-ncpt-tools"
 version = "0.1.0"
 description = "A simple package for working with the NCPT data."
+license = "MIT"
 authors = ["Paul Jaffe <pauljaffe7@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/pauljaffe/lumos-ncpt-tools"
+repository = "https://github.com/pauljaffe/lumos-ncpt-tools"
 
 [tool.poetry.dependencies]
 python = "^3.8"
