@@ -15,11 +15,11 @@ from manuscript.subtest_vs_subtest import Figure2
 
 data_directory = 'CHANGE/TO/DATA/DIRECTORY' 
 save_directory = 'CHANGE/TO/SAVE/DIRECTORY' 
-t1_figsize = figsize = (7.5, 5.5)
-t2_figsize = figsize = (7.5, 5.5)
-t3_figsize = figsize = (7.5, 1)
-t4_figsize = figsize = (7.5, 5.5)
-t5_figsize = figsize = (7.5, 5.5)
+t1_figsize = (7.5, 5.5)
+t2_figsize = (7.5, 5.5)
+t3_figsize = (7.5, 1)
+t4_figsize = (7.5, 5.5)
+t5_figsize = (7.5, 5.5)
 f1_figsize = (6.5, 2.5)
 f2_figsize = (7.2, 4)
 
