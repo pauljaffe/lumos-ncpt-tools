@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from lumos_ncpt_tools.ncpt import NCPT
 from lumos_ncpt_tools.utils import load_data
 
-class Figure2():
+class Figure1():
     """Subtest score correlation matrices for each battery."""
     # Only users who completed the entire test battery
     # are included in the correlation analyses.
@@ -19,8 +19,8 @@ class Figure2():
     
     def __init__(self, data_dir, save_dir, figsize):
         self.data_dir = data_dir
-        self.png_path = os.path.join(save_dir, 'figure2.png')
-        self.svg_path = os.path.join(save_dir, 'figure2.svg')        
+        self.png_path = os.path.join(save_dir, 'figure1.png')
+        self.svg_path = os.path.join(save_dir, 'figure1.svg')        
         self.config = yaml.safe_load(pkgutil.get_data('lumos_ncpt_tools', self.config_path))
         self.batteries = self.config['batteries'].keys()
         self.figsize = figsize
