@@ -25,7 +25,6 @@ class Table4():
                      ['battery_id', 'NCPT battery identifier'],
                      ['specific_subtest_id', 'NCPT subtest identifier'],
                      ['raw_score', 'Raw score for the subtest'],
-                     ['rank_INT_normed_score', 'Normalized subtest score calculated using a rank-based INT'],
                      ['grand_index', 'Composite score for the entire test (Grand Index)']]
         
     def make_table(self):
