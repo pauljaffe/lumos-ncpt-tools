@@ -4,11 +4,10 @@ import pandas as pd
 import numpy as np
 import yaml
 
-from .mixins import OutliersMixin, ScoreLookupMixin
+from .mixins import OutliersMixin
 
 
-class NCPT(OutliersMixin,
-           ScoreLookupMixin):
+class NCPT(OutliersMixin):
     """Methods for filtering and analyzing a NCPT dataset.
     
     Args
