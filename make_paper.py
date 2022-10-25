@@ -6,22 +6,22 @@ from manuscript.table3 import Table3
 from manuscript.table4 import Table4
 from manuscript.table5 import Table5
 from manuscript.summary_stats import SummaryStats
-from manuscript.demog_vs_GI import Figure1
-from manuscript.subtest_vs_subtest import Figure2
+from manuscript.subtest_vs_subtest import Figure1
+from manuscript.norm_tables import NormTables
 
 
 # This script generates the tables/figures and reports summary stats for the
 # data descriptor manuscript. 
 
-data_directory = 'CHANGE/TO/DATA/DIRECTORY' 
-save_directory = 'CHANGE/TO/SAVE/DIRECTORY' 
+#data_directory = 'CHANGE/TO/DATA/DIRECTORY' 
+#save_directory = 'CHANGE/TO/SAVE/DIRECTORY' 
+#norm_save_directory = 'CHANGE/TO/NORM/SAVE/DIRECTORY'
 t1_figsize = (7.5, 5.5)
 t2_figsize = (7.5, 5.5)
 t3_figsize = (7.5, 1)
 t4_figsize = (7.5, 5.5)
 t5_figsize = (7.5, 5.5)
-f1_figsize = (6.5, 2.5)
-f2_figsize = (7.2, 4)
+f1_figsize = (7.2, 4)
 
 # Plotting params
 fontsize = 6
@@ -48,9 +48,9 @@ t4.make_table()
 t5 = Table5(save_directory, t5_figsize)
 t5.make_table()
 
+plt.rcParams.update({'font.size': 5})
 f1 = Figure1(data_directory, save_directory, f1_figsize)
 f1.make_figure()
 
-plt.rcParams.update({'font.size': 5})
-f2 = Figure2(data_directory, save_directory, f2_figsize)
-f2.make_figure()
+norm_tables = NormTables(data_directory, norm_save_directory) 
+norm_tables.make_tables()
