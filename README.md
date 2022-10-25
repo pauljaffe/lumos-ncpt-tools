@@ -3,7 +3,7 @@ lumos-ncpt-tools
 
 lumos-ncpt-tools is a bare-bones Python package for working with data from the NeuroCognitive Performance Test (NCPT; Lumos Labs, Inc.). 
 
-NCPT data from ~750,000 adults are publicly available at [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6540313.svg)](https://doi.org/10.5281/zenodo.6540313)
+NCPT data from ~750,000 adults are publicly available at [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6540313.svg)](https://doi.org/10.5281/zenodo.6540312)
 
 For more details about the dataset, check out the Data Descriptor publication:
 Jaffe, P.I., Kaluszka, A., Ng, N.F. & Schafer R.J. A massive dataset of the NeuroCognitive Performance Test, a web-based cognitive assessment. *Scientific Data* (2022).
