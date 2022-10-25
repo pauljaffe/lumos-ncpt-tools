@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf
 
 from lumos_ncpt_tools.ncpt import NCPT
 from lumos_ncpt_tools.utils import load_data
@@ -14,6 +15,8 @@ class Figure1():
     """Subtest score correlation matrices for each battery."""
     # Only users who completed the entire test battery
     # are included in the correlation analyses.
+    # Education, age, and gender are regressed out from the
+    # raw scores prior to computing correlations. 
     
     config_path = '../lumos_ncpt_tools/config/ncpt_config.yaml'
     
@@ -27,6 +30,7 @@ class Figure1():
         self.palette = 'viridis'
         self.vmin = 0 # For defining the color bar axis 
         self.vmax = 0.7
+        self.subtests_to_invert = [26, 32, 39, 40]
         # Customize order that subtests are arranged on heatmap
         self.subtest_order = {14: [29, 30, 28, 27, 26],
                               17: [29, 30, 28, 27, 32, 31],
@@ -36,6 +40,8 @@ class Figure1():
                               39: [29, 30, 28, 33, 31, 38, 39, 40],
                               50: [29, 30, 43, 44, 31, 45, 39, 40],
                               60: [55, 51, 54, 53, 52]}
+        # Define regression model 
+        self.model = 'raw_score ~ age + C(education_level) + C(gender)'
        
     def make_figure(self):
         fig = plt.figure(constrained_layout=False, figsize=self.figsize)
@@ -74,13 +80,21 @@ class Figure1():
         bat_ncpt = NCPT(bat_df)
         del bat_df
         filt_df, _ = bat_ncpt.filter_by_completeness()        
+        filt_df = filt_df.dropna(subset=['gender', 'education_level', 'age'])
         subtests = self.subtest_order[bat_id]
         scores = {}
         
         for sub in subtests:
             name = self.config['subtests'][sub][1]
-            sub_df = filt_df.query('specific_subtest_id == @sub')
-            scores[name] = sub_df['rank_INT_normed_score'].values
+            sub_df = filt_df.query('specific_subtest_id == @sub').copy()
+            if sub in self.subtests_to_invert:
+                sub_df.loc[:, 'raw_score'] = -1 * sub_df['raw_score']
+            sub_model = smf.ols(formula=self.model, data=sub_df)
+            results = sub_model.fit()
+            predictions = results.predict(sub_df)
+            residuals = sub_df['raw_score'] - predictions
+            scores[name] = residuals.values
+
         score_df = pd.DataFrame(scores)
         corrs = score_df.corr(method='pearson')      
         np.fill_diagonal(corrs.values, np.nan)

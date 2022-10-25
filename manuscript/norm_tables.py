@@ -19,11 +19,11 @@ class NormTables():
     cols = ['subtest_name', 'specific_subtest_id', 'age', 'education_level', 'gender', 'N', 
             'mean', 'SD', '10th_perc', '25th_perc', '50th_perc', '75th_perc', '90th_perc']
     batteries = [17, 32, 39, 50, 60]
-    subtests_to_invert = [26, 32, 39, 40, 48, 49]
+    subtests_to_invert = [26, 32, 39, 40]
     
     def __init__(self, data_dir, save_dir):
         self.data_dir = data_dir
-        self.save_dir = os.path.join(save_dir, 'norm_tables')
+        self.save_dir = os.path.join(save_dir, 'demog_norm_tables')
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
         self.config = yaml.safe_load(pkgutil.get_data('lumos_ncpt_tools', self.config_path))
@@ -40,10 +40,12 @@ class NormTables():
         data_fn = f'battery{bat_id}_df.csv'
         bat_df = load_data(self.data_dir, data_fn) 
         subtests = self.config['batteries'][bat_id][1]
+        bat_min = float('inf')
         for sub in subtests:
             sub_df = bat_df.query('specific_subtest_id == @sub')
-            subtest_data = self._get_subtest_data(sub_df, sub)
+            subtest_data, bat_min = self._get_subtest_data(sub_df, sub, bat_min)
             bat_data.extend(subtest_data)
+        print(f'Battery {bat_id} bin min N: {bat_min}')
         bat_data.extend(self._get_GI_data(bat_df))
         return bat_data
 
@@ -54,11 +56,12 @@ class NormTables():
         df = df.dropna(subset=['grand_index', 'gender', 'education_level', 'age'])
         for dbin in product(self.age_bins, self.edu_bins, self.genders):
             bin_data = copy.copy(GI_vec)
-            bin_data.extend(self._get_bin_data(df, dbin, 'grand_index'))
+            this_bin_data, _ = self._get_bin_data(df, dbin, 'grand_index', 0)
+            bin_data.extend(this_bin_data)
             GI_data.append(bin_data)
         return GI_data
 
-    def _get_subtest_data(self, df, sub_id):
+    def _get_subtest_data(self, df, sub_id, bat_min):
         subtest_data = []
         n_pre = len(df)
         df_filt = df.dropna(subset=['raw_score', 'gender', 'education_level', 'age'])
@@ -66,11 +69,12 @@ class NormTables():
         bin_vec = [sub_name, sub_id]
         for dbin in product(self.age_bins, self.edu_bins, self.genders):
             bin_data = copy.copy(bin_vec)
-            bin_data.extend(self._get_bin_data(df_filt, dbin, sub_id))
+            this_bin_data, bat_min = self._get_bin_data(df_filt, dbin, sub_id, bat_min)
+            bin_data.extend(this_bin_data)
             subtest_data.append(bin_data)
-        return subtest_data
+        return subtest_data, bat_min
 
-    def _get_bin_data(self, df, dbin, sub_id):
+    def _get_bin_data(self, df, dbin, sub_id, bat_min):
         bin_data = []
         age, edu, gen = dbin[0], dbin[1], dbin[2]
         age_lo, age_hi = age[0], age[1]
@@ -86,9 +90,12 @@ class NormTables():
             bin_data.append('Male')
         else:
             bin_data.append('Female')
-        bin_data.append(len(bin_df))
+        N = len(bin_df)
+        bin_data.append(N)
+        if N < bat_min:
+            bat_min = N
         bin_data.extend(self._get_bin_stats(bin_df, sub_id))
-        return bin_data
+        return bin_data, bat_min
 
     def _get_bin_stats(self, df, sub_id):
         stats = []

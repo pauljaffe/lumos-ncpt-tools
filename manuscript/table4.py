@@ -24,6 +24,7 @@ class Table4():
                      ['test_run_id', 'Identifier for the entire test taken by the participant'],
                      ['battery_id', 'NCPT battery identifier'],
                      ['specific_subtest_id', 'NCPT subtest identifier'],
+                     ['time_of_day', 'Time of day that test was initiated in hours (rounded down)'],
                      ['raw_score', 'Raw score for the subtest'],
                      ['grand_index', 'Composite score for the entire test (Grand Index)']]
         
